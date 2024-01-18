@@ -10,12 +10,10 @@ export class DayComponent {
   @Input('day') day: Day = new Day("")
 
   constructor(){
-    
   }
 }
 
 export class Day{
-
   constructor(date: string | null){
     if(date) {
       this.date = new Date(date)

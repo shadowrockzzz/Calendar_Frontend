@@ -1,0 +1,19 @@
+<div class="flex flex-col gap-8 p-10 mx-auto relative justify-center h-fit w-fit items-center">
+    <div class="flex flex-row gap-10 mx-auto">
+        <div class="min-w-[5vh] min-h-[5vh]" *ngFor="let item of weekDaysList">
+            {{item}}
+        </div>
+    </div>
+    <div class="flex flex-row gap-10 mx-auto" *ngFor="let items of list2D">
+        <div class="flex flex-col gap-5" *ngFor="let item of items">
+            <div class="min-w-[5vh] min-h-[5vh]" *ngIf="(item.monthlyDate) else elseContent">
+                {{item.monthlyDate}}
+            </div>
+            <ng-template #elseContent>
+                <div class="min-w-[5vh] min-h-[5vh]">
+                    
+                </div>
+            </ng-template> 
+        </div>
+    </div>
+</div>

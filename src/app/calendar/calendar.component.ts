@@ -1,5 +1,9 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { Day } from './day/day.component';
+import { TaskService } from '../task.service';
+import {NgForm} from '@angular/forms';
+import { StripeService } from '../stripe.service';
+import { v4} from 'uuid';
 
 @Component({
   selector: 'app-calendar',
@@ -8,10 +12,44 @@ import { Day } from './day/day.component';
 })
 export class CalendarComponent {
 
-  constructor(public cdr: ChangeDetectorRef){
+  mode = 'calendar'
+
+  formData = {
+    name: '',
+    phone: '',
+    email: ''
+  }
+
+  storeData = {
+    date: '',
+    time: '',
+    name: '',
+    phone: '',
+    email: ''
+  }
+  constructor(public cdr: ChangeDetectorRef, private taskService: TaskService,  private stripeService: StripeService){
     this.date = new Date()
     this.monthNumber = this.date.getUTCMonth()
     this.yearNumber = this.date.getUTCFullYear()
+    taskService.getTasks().subscribe((data)=>{
+      console.log(data)
+    })
+  }
+
+  onFormSubmit(){
+    this.storeData.name = this.formData.name
+    this.storeData.email = this.formData.email
+    this.storeData.phone = this.formData.phone
+    this.formData.name=""
+    this.formData.phone=""
+    this.formData.email=""
+    this.mode="buffering"
+    this.taskService.addTask(this.storeData).subscribe((res)=>{
+        console.log(res)
+      })
+    this.stripeService.checkout().then((data)=>{
+      console.log(data)
+    });
   }
 
   date = new Date()
@@ -21,15 +59,62 @@ export class CalendarComponent {
 
   list2D : Day[][] = [[],[],[],[],[]]
   dayList : Day[] = []
+  hours = [{time:"9:00", isReserved:false},{time:"11:00", isReserved:false},{time:"13:00", isReserved:false},{time:"15:00", isReserved:false},{time:"17:00", isReserved:false}]
+
+  tasks: any
+
+  loadTasks() {
+    this.taskService.getTasks().subscribe((tasks) => {
+      this.tasks = tasks;
+    });
+  }
+
+  resetHours(){
+    for(let i in this.hours){
+      this.hours[i].isReserved = false
+    }
+  }
 
   getMonth(month: number) : string{
     let monthArray = ["January","Febrauary","March","April","May","June","July","August","September","October","November","December"]
     return monthArray[month]
   }
 
+  dayClickEvent(item: Day){
+    this.storeData.date = item.date.getDate() + "-"+(item.date.getMonth()+1)+"-"+item.date.getFullYear()
+    console.log(this.storeData.date)
+    this.taskService.getReservations(this.storeData.date).subscribe((data:any)=>{
+      for (let i in data){
+        for (let hour of this.hours){
+          if(data[i].time===hour.time){
+            hour.isReserved = true
+          }
+        }
+      }
+    })
+    this.mode = "time"
+    this.resetHours()
+  }
+
+  backBtnClk(){
+    if(this.mode==="form"){
+      this.mode = "time"
+    }
+    else if(this.mode==="time"){
+      this.mode = "calendar"
+    }
+  }
+
+  timeSelectEvent(item : any, hour:any){
+    if(!hour.isReserved){
+      this.storeData.time = item.srcElement.innerText
+      this.mode = "form"
+    }
+  }
+
   ngOnInit(){
     this.prepareMonthCalendar()
-    // this.nextMonthDaysMissed =6-this.dayList[this.dayList.length-1].day
+    this.loadTasks()
   }
 
   prevBtnlk(){
@@ -43,6 +128,7 @@ export class CalendarComponent {
     this.month = new Month(this.monthNumber, this.yearNumber)
     this.prepareMonthCalendar()
     this.cdr.detectChanges()
+    console.log(this.tasks)
   }
 
   nextBtnClk(){
@@ -117,4 +203,12 @@ export class Month{
     this.monthLength = new Date(this.year, this.month+1,0).getDate()
   }
   public monthLength: number = 0
+}
+
+export enum userDate {
+  date,
+  time,
+  name,
+  phone,
+  email
 }

@@ -1,9 +1,37 @@
-<div class="flex flex-col gap-5 pt-20">
+<button *ngIf="mode!='calendar'" (click)="backBtnClk()" class="flex w-fit mx-auto mt-10 bg-gray-100 shadow border border-black cursor-pointer shadow-2xl rounded-md px-3 py-1">Back</button>
+
+<div *ngIf="mode==='calendar'" class="flex flex-col gap-5 pt-20">
     <div class="flex flex-row gap-10 mx-auto">
         <button (click)="prevBtnlk()">Previous</button>
         <span>{{yearNumber}}</span>
         <span class="min-w-20 flex mx-auto">{{getMonth(monthNumber)}}</span>
         <button (click)="nextBtnClk()">Next</button>
     </div>
-    <app-month [list2D]="list2D"></app-month>
+    <app-month [list2D]="list2D" (dayClkFunc)="dayClickEvent($event)" ></app-month>
+</div>
+<div *ngIf="mode==='time'" class="flex flex-col gap-5 pt-20 mx-auto justify-center w-2/5 items-center">
+    <div (click)="timeSelectEvent($event, hour)" class="p-10 border border-gray-100 shadow shadow-lg w-1/2 flex items-center justify-center cursor-pointer" [ngClass]="[hour.isReserved ? 'bg-gray-200':'bg-white']" *ngFor="let hour of hours">
+        {{hour.time}}
+    </div>
+</div>
+<div *ngIf="this.mode==='buffering'">
+    <p>Loading....</p>
+</div>
+
+<div class="flex justify-center items-center h-[80vh] gap-20" *ngIf="mode==='form'">
+    <form #myForm="ngForm" (ngSubmit)="onFormSubmit()" class="flex flex-col w-2/6 gap-10 justify-center ">
+        <label for="name" class="flex justify-between">
+            <p>Name</p>
+            <input id="name" name="name" [(ngModel)]="formData.name" [required]="true" class="w-1/2 bg-gray-200 rounded-lg px-4 py-2" type="text">
+        </label>
+        <label for="phone" class="flex justify-between"> 
+            <p>Phone Number</p>
+            <input id="phone" name="phone" [(ngModel)]="formData.phone" class="w-1/2 bg-gray-200 rounded-lg px-4 py-2" type="text">
+        </label>
+        <label for="email" class="flex justify-between">
+            <P>Email</P>
+            <input id="email" name="email" [(ngModel)]="formData.email" class="w-1/2 bg-gray-200 rounded-lg px-4 py-2" type="email">
+        </label>
+        <button class="bg-gray-100 shadow shadow-lg rounded-lg w-2/5 mx-auto px-4 py-2" type="submit">Book my reservation</button>
+    </form>
 </div>

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-day',
@@ -8,8 +8,13 @@ import { Component, Input } from '@angular/core';
 export class DayComponent {
 
   @Input('day') day: Day = new Day("")
+  @Output('clkEvent') clkEventOutput: EventEmitter<Day> = new EventEmitter<Day>()
 
   constructor(){
+  }
+
+  clkEvent(){
+    this.clkEventOutput.next(this.day)
   }
 }
 
